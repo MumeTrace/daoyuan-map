@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>玄天界三维地图</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #0d1622;
+        color: #f6dfb7;
+        font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      }
+
+      .page {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 32px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(32px, 5vw, 64px);
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 0;
+        max-width: 680px;
+        color: rgba(246, 223, 183, 0.78);
+        line-height: 1.8;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section>
+        <h1>玄天界三维地图</h1>
+        <p>脚本加载后会在页面右下角生成“地图”按钮，点击即可打开三维世界地图。</p>
+      </section>
+    </main>
+    <script src="./xuantian-map.js"></script>
+  </body>
+</html>

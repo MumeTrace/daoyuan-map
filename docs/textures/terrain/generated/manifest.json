@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-07-17T05:02:02.496Z",
+  "elapsedMs": 391882.7433,
+  "stats": {
+    "baseLuminanceMin": 0.1455179910151971,
+    "baseLuminanceMax": 0.8908259245365987,
+    "baseDarkPixelRatio": 0,
+    "normalMaxGradient": 0.44295573726298726,
+    "aoMin": 0.68,
+    "roughnessMin": 0.33999999999999997,
+    "roughnessMax": 0.92
+  },
+  "files": [
+    {
+      "file": "terrain-basecolor-high.webp",
+      "size": 88476,
+      "width": 3072,
+      "height": 3072
+    },
+    {
+      "file": "terrain-normal-high.png",
+      "size": 865122,
+      "width": 3072,
+      "height": 3072
+    },
+    {
+      "file": "terrain-orm-high.png",
+      "size": 648031,
+      "width": 2048,
+      "height": 2048
+    },
+    {
+      "file": "terrain-emissive-high.webp",
+      "size": 12414,
+      "width": 2048,
+      "height": 2048
+    },
+    {
+      "file": "terrain-basecolor-medium.webp",
+      "size": 48904,
+      "width": 2048,
+      "height": 2048
+    },
+    {
+      "file": "terrain-normal-medium.png",
+      "size": 598848,
+      "width": 2048,
+      "height": 2048
+    },
+    {
+      "file": "terrain-orm-medium.png",
+      "size": 648031,
+      "width": 2048,
+      "height": 2048
+    },
+    {
+      "file": "terrain-emissive-medium.webp",
+      "size": 12414,
+      "width": 2048,
+      "height": 2048
+    },
+    {
+      "file": "terrain-basecolor-low.webp",
+      "size": 19114,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "terrain-normal-low.png",
+      "size": 315982,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "terrain-orm-low.png",
+      "size": 248365,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "terrain-emissive-low.webp",
+      "size": 4248,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "terrain-normal-preview-high.png",
+      "size": 266626,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "terrain-basecolor-preview.png",
+      "size": 472825,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "terrain-ao-preview.png",
+      "size": 113213,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "file": "terrain-roughness-preview.png",
+      "size": 2404,
+      "width": 1024,
+      "height": 1024
+    }
+  ]
+}
