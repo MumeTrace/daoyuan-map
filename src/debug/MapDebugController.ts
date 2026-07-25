@@ -90,7 +90,7 @@ export class MapDebugController {
       <div class="xuantian-map-debug-readout">网格: ${this.options.terrainStats.segments} segments / ${this.options.terrainStats.vertexCount} vertices</div>
       <div class="xuantian-map-debug-readout">生成: ${this.options.terrainStats.terrainGenerationMs.toFixed(1)}ms</div>
       <div class="xuantian-map-debug-readout">高度: ${this.options.terrainStats.minHeight.toFixed(1)} ～ ${this.options.terrainStats.maxHeight.toFixed(1)}</div>
-      <div class="xuantian-map-debug-readout">山峰: 地形连续山脊 25～100；装饰岩峰 10～24</div>
+      <div class="xuantian-map-debug-readout">山峰: 连续山脊随地形垂直比例缩放；装饰峰仅作地标</div>
       <div class="xuantian-map-debug-readout">植被: ${vegetationStats ? `${this.totalVegetationInstances(vegetationStats)} instances / ${vegetationStats.drawCalls} draws` : '未生成'}</div>
       <div class="xuantian-map-debug-readout">树木: 普通 3～6；灵树 6～9.2；建筑预留 5～20</div>
       <div class="xuantian-map-debug-readout">GLB: ${landmarkStats ? `${landmarkStats.loadedModelCount}/${landmarkStats.requestedModelCount} loaded, fallback ${landmarkStats.fallbackCount}` : '未启用'}</div>

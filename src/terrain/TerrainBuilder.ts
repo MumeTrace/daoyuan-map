@@ -139,8 +139,10 @@ export class TerrainBuilder {
       mountainHeight: 0,
       ridgeHeight: 0,
       hillHeight: 0,
+      regionalLandformHeight: 0,
       volcanoHeight: 0,
       valleyDepth: 0,
+      regionalLandformDepth: 0,
       riverDepth: 0,
       erosionDepth: 0,
     };
@@ -152,8 +154,10 @@ export class TerrainBuilder {
     target.mountainHeight = Math.max(target.mountainHeight, Math.abs(contributions.mountainHeight));
     target.ridgeHeight = Math.max(target.ridgeHeight, Math.abs(contributions.ridgeHeight));
     target.hillHeight = Math.max(target.hillHeight, Math.abs(contributions.hillHeight));
+    target.regionalLandformHeight = Math.max(target.regionalLandformHeight, Math.abs(contributions.regionalLandformHeight));
     target.volcanoHeight = Math.max(target.volcanoHeight, Math.abs(contributions.volcanoHeight));
     target.valleyDepth = Math.max(target.valleyDepth, Math.abs(contributions.valleyDepth));
+    target.regionalLandformDepth = Math.max(target.regionalLandformDepth, Math.abs(contributions.regionalLandformDepth));
     target.riverDepth = Math.max(target.riverDepth, Math.abs(contributions.riverDepth));
     target.erosionDepth = Math.max(target.erosionDepth, Math.abs(contributions.erosionDepth));
   }

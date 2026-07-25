@@ -41,7 +41,7 @@ export class SectModelBuilder {
     group.name = '标志建筑层';
 
     SECTS.forEach((sect) => {
-      const modelLift = sect.kind === 'star' ? 78 : 2.1;
+      const modelLift = sect.kind === 'star' ? 78 : 0.08;
       const position = sampler.sampleNormalized(sect.position, modelLift);
       const sectGroup = this.createSect(sect);
       sectGroup.position.set(position.x, position.y, position.z);
@@ -138,20 +138,18 @@ export class SectModelBuilder {
 
   private createPalaceCity(palette: SectPalette): THREE.Group {
     const group = new THREE.Group();
-    group.add(this.createPagoda(palette, 5, 1.8, 10.5));
+    const centralHall = this.createTempleHall(palette, 6.8, 4.8, 5.2, 1.6);
+    centralHall.position.set(0, 1.45, -0.8);
+    group.add(centralHall);
     [-4.2, 4.2].forEach((x) => {
-      const wing = this.box(3.2, 2.2, 2.5, palette.stone);
-      wing.position.set(x, 1.9, 0);
-      group.add(wing, this.roof(x, 3.35, 0, 2.4, palette));
+      const wing = this.createTempleHall(palette, 3.8, 2.9, 3.2, 1.0);
+      wing.position.set(x, 1.45, 1.4);
+      group.add(wing);
     });
-    [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach((angle) => {
-      const p = polar(4.7, angle);
-      const gate = this.box(1.4, 2.4, 0.5, palette.accent);
-      gate.position.set(p.x, 2.1, p.z);
-      gate.rotation.y = -angle;
-      group.add(gate);
-    });
-    this.addColumnRing(group, palette, 5.2, 16, 2.6);
+    const rearPagoda = this.createPagoda(palette, 5, 1.35, 9.6);
+    rearPagoda.position.set(0, 1.45, -4.6);
+    group.add(rearPagoda);
+    group.add(this.createBalustrade(palette, 7.3, 6.1, 1.7));
     return group;
   }
 
@@ -200,14 +198,20 @@ export class SectModelBuilder {
 
   private createBuddhaTemple(palette: SectPalette): THREE.Group {
     const group = new THREE.Group();
-    group.add(this.createPagoda(palette, 6, 1.55, 11.2));
+    const mainHall = this.createTempleHall(palette, 6.4, 4.7, 4.8, 1.45);
+    mainHall.position.y = 1.45;
+    group.add(mainHall);
+    const pagoda = this.createPagoda(palette, 7, 1.25, 12.4);
+    pagoda.position.set(0, 1.45, -4.4);
+    group.add(pagoda);
     const dome = new THREE.Mesh(
       new THREE.SphereGeometry(1.8, FEATURE_CONFIG.sectModels.domeSegments, 20, 0, Math.PI * 2, 0, Math.PI / 2),
       this.material(palette.accent, 0.42, 0.18),
     );
-    dome.position.y = 8.6;
+    dome.scale.set(0.72, 0.72, 0.72);
+    dome.position.set(0, 8.2, -4.4);
     group.add(dome);
-    this.addColumnRing(group, palette, 4.8, 12, 2.2);
+    group.add(this.createBalustrade(palette, 6.9, 5.8, 1.55));
     return group;
   }
 
@@ -241,10 +245,19 @@ export class SectModelBuilder {
 
   private createBeastSanctum(palette: SectPalette): THREE.Group {
     const group = new THREE.Group();
-    group.add(this.createPagoda(palette, 3, 1.15, 6.8));
-    const tree = new THREE.Mesh(new THREE.IcosahedronGeometry(2.2, 3), this.material(palette.accent, 0.72, 0.02));
-    tree.position.y = 6.4;
-    group.add(tree);
+    const hall = this.createTempleHall(palette, 4.6, 3.4, 3.5, 1.15);
+    hall.position.y = 1.45;
+    group.add(hall);
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.64, 5.4, 28, 4), this.material(0x51402b, 0.9, 0));
+    trunk.position.set(0, 4.1, -3.2);
+    group.add(trunk);
+    const foliageMaterial = this.material(palette.accent, 0.82, 0.01);
+    for (let index = 0; index < 7; index += 1) {
+      const foliage = new THREE.Mesh(new THREE.IcosahedronGeometry(1.25 + (index % 3) * 0.22, 3), foliageMaterial);
+      const angle = (index / 7) * Math.PI * 2;
+      foliage.position.set(Math.cos(angle) * 1.55, 6.2 + (index % 2) * 0.7, -3.2 + Math.sin(angle) * 1.35);
+      group.add(foliage);
+    }
     this.addColumnRing(group, palette, 4.4, 9, 2.1);
     return group;
   }
@@ -298,12 +311,140 @@ export class SectModelBuilder {
 
   private createDaoCourtyard(palette: SectPalette): THREE.Group {
     const group = new THREE.Group();
-    group.add(this.createPagoda(palette, 4, 1.25, 8.1));
+    const mainHall = this.createTempleHall(palette, 5.2, 3.8, 4.1, 1.25);
+    mainHall.position.y = 1.45;
+    group.add(mainHall);
     [-3.4, 3.4].forEach((x) => {
-      const hall = this.box(2.2, 1.7, 2.0, palette.stone);
-      hall.position.set(x, 1.55, 1.2);
-      group.add(hall, this.roof(x, 2.55, 1.2, 1.8, palette));
+      const hall = this.createTempleHall(palette, 2.7, 2.2, 2.5, 0.78);
+      hall.position.set(x, 1.45, 1.5);
+      group.add(hall);
     });
+    return group;
+  }
+
+  private createTempleHall(
+    palette: SectPalette,
+    width: number,
+    depth: number,
+    wallHeight: number,
+    roofHeight: number,
+  ): THREE.Group {
+    const group = new THREE.Group();
+    const base = new THREE.Mesh(
+      new THREE.BoxGeometry(width * 1.14, 0.42, depth * 1.16, 8, 2, 8),
+      this.material(palette.stone, 0.84, 0.03),
+    );
+    base.position.y = 0.21;
+
+    const wall = this.box(width * 0.88, wallHeight, depth * 0.82, palette.stone);
+    wall.position.y = 0.48 + wallHeight * 0.5;
+
+    const door = this.box(width * 0.2, wallHeight * 0.72, 0.12, palette.dark);
+    door.position.set(0, 0.5 + wallHeight * 0.36, depth * 0.42);
+
+    const roof = this.createTierRoof(palette, Math.max(width, depth) * 0.62, roofHeight);
+    roof.scale.z = depth / width;
+    roof.position.y = wallHeight + 0.46;
+    group.add(base, wall, door, roof);
+
+    const columnMaterial = this.material(palette.roof, 0.58, 0.08);
+    const columnsPerSide = Math.max(4, Math.round(width / 1.4));
+    for (let index = 0; index < columnsPerSide; index += 1) {
+      const t = columnsPerSide === 1 ? 0.5 : index / (columnsPerSide - 1);
+      const x = -width * 0.45 + t * width * 0.9;
+      for (const z of [-depth * 0.45, depth * 0.45]) {
+        const column = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.14, wallHeight * 0.96, 20, 3), columnMaterial);
+        column.position.set(x, 0.46 + wallHeight * 0.48, z);
+        group.add(column);
+      }
+    }
+
+    const bracketMaterial = this.material(palette.accent, 0.46, 0.14);
+    for (let index = 0; index < columnsPerSide; index += 1) {
+      const t = index / Math.max(1, columnsPerSide - 1);
+      const x = -width * 0.45 + t * width * 0.9;
+      const bracket = new THREE.Mesh(new RoundedBoxGeometry(0.48, 0.16, 0.18, 3, 0.035), bracketMaterial);
+      bracket.position.set(x, wallHeight + 0.34, depth * 0.49);
+      group.add(bracket);
+    }
+    return group;
+  }
+
+  private createCurvedRoofGeometry(radius: number, height: number, segments: number): THREE.BufferGeometry {
+    const vertices: number[] = [];
+    const uvs: number[] = [];
+    const indices: number[] = [];
+    const rowSize = segments + 1;
+
+    for (let zIndex = 0; zIndex <= segments; zIndex += 1) {
+      const v = zIndex / segments;
+      const z = (v * 2 - 1) * radius;
+      for (let xIndex = 0; xIndex <= segments; xIndex += 1) {
+        const u = xIndex / segments;
+        const x = (u * 2 - 1) * radius;
+        const nx = Math.abs(x / radius);
+        const nz = Math.abs(z / radius);
+        const edge = Math.max(nx, nz);
+        const hip = Math.pow(Math.max(0, 1 - edge), 1.45) * height;
+        const upturnedCorner = Math.pow(nx * nz, 3.4) * height * 0.62;
+        const subtleCurve = Math.sin((1 - edge) * Math.PI) * height * 0.08;
+        vertices.push(x, hip + upturnedCorner + subtleCurve, z);
+        uvs.push(u, v);
+      }
+    }
+
+    for (let zIndex = 0; zIndex < segments; zIndex += 1) {
+      for (let xIndex = 0; xIndex < segments; xIndex += 1) {
+        const a = zIndex * rowSize + xIndex;
+        const b = a + 1;
+        const c = a + rowSize;
+        const d = c + 1;
+        indices.push(a, c, b, b, c, d);
+      }
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
+  }
+
+  private createBalustrade(palette: SectPalette, width: number, depth: number, y: number): THREE.Group {
+    const group = new THREE.Group();
+    const material = this.material(palette.accent, 0.52, 0.14);
+    const railHeight = 0.68;
+    const postCountX = Math.max(6, Math.round(width / 0.75));
+    const postCountZ = Math.max(5, Math.round(depth / 0.75));
+
+    [
+      { width, depth: 0.09, x: 0, z: depth * 0.5 },
+      { width, depth: 0.09, x: 0, z: -depth * 0.5 },
+      { width: 0.09, depth, x: width * 0.5, z: 0 },
+      { width: 0.09, depth, x: -width * 0.5, z: 0 },
+    ].forEach((rail) => {
+      const mesh = new THREE.Mesh(new RoundedBoxGeometry(rail.width, 0.1, rail.depth, 3, 0.025), material);
+      mesh.position.set(rail.x, y + railHeight, rail.z);
+      group.add(mesh);
+    });
+
+    for (let index = 0; index < postCountX; index += 1) {
+      const x = -width * 0.5 + (index / (postCountX - 1)) * width;
+      for (const z of [-depth * 0.5, depth * 0.5]) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, railHeight, 12), material);
+        post.position.set(x, y + railHeight * 0.5, z);
+        group.add(post);
+      }
+    }
+    for (let index = 1; index < postCountZ - 1; index += 1) {
+      const z = -depth * 0.5 + (index / (postCountZ - 1)) * depth;
+      for (const x of [-width * 0.5, width * 0.5]) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, railHeight, 12), material);
+        post.position.set(x, y + railHeight * 0.5, z);
+        group.add(post);
+      }
+    }
     return group;
   }
 
@@ -311,17 +452,21 @@ export class SectModelBuilder {
     const group = new THREE.Group();
     for (let level = 0; level < levels; level += 1) {
       const t = level / levels;
-      const bodyHeight = height / levels * 0.58;
+      const bodyHeight = (height / levels) * 0.56;
       const levelRadius = radius * (1 - t * 0.36);
       const y = 1.2 + level * (height / levels);
-      const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(levelRadius * 0.72, levelRadius * 0.9, bodyHeight, FEATURE_CONFIG.sectModels.towerSegments, 3),
-        this.material(palette.stone, 0.76, 0.04),
-      );
+      const body = this.box(levelRadius * 1.28, bodyHeight, levelRadius * 1.28, palette.stone);
       body.position.y = y;
-      const roof = this.createTierRoof(palette, levelRadius * 1.36, bodyHeight * 0.42);
-      roof.position.y = y + bodyHeight * 0.5;
+      const roof = this.createTierRoof(palette, levelRadius * 1.48, bodyHeight * 0.48);
+      roof.position.y = y + bodyHeight * 0.44;
       group.add(body, roof);
+
+      const balcony = new THREE.Mesh(
+        new THREE.BoxGeometry(levelRadius * 1.72, 0.08, levelRadius * 1.72, 3, 1, 3),
+        this.material(palette.accent, 0.52, 0.14),
+      );
+      balcony.position.y = y - bodyHeight * 0.46;
+      group.add(balcony);
     }
     const spire = this.createObelisk(palette, radius * 0.28, height * 0.26);
     spire.position.y = height + 0.7;
@@ -382,13 +527,45 @@ export class SectModelBuilder {
   private createTierRoof(palette: SectPalette, radius: number, height: number): THREE.Group {
     const group = new THREE.Group();
     const roof = new THREE.Mesh(
-      new THREE.CylinderGeometry(radius * 0.2, radius, height, 12, 2),
+      this.createCurvedRoofGeometry(radius, height, FEATURE_CONFIG.sectModels.roofSegments),
       this.material(palette.roof, 0.58, 0.1),
     );
-    const eave = new THREE.Mesh(new THREE.TorusGeometry(radius * 0.96, 0.055, 10, 72), this.material(palette.accent, 0.48, 0.18));
-    eave.rotation.x = Math.PI / 2;
-    eave.position.y = -height * 0.42;
-    group.add(roof, eave);
+    group.add(roof);
+
+    const fasciaMaterial = this.material(palette.accent, 0.5, 0.16);
+    const fasciaDepth = 0.1;
+    [
+      { x: 0, z: radius, rotation: 0 },
+      { x: 0, z: -radius, rotation: 0 },
+      { x: radius, z: 0, rotation: Math.PI / 2 },
+      { x: -radius, z: 0, rotation: Math.PI / 2 },
+    ].forEach((edge) => {
+      const fascia = new THREE.Mesh(new RoundedBoxGeometry(radius * 2.05, 0.16, fasciaDepth, 3, 0.035), fasciaMaterial);
+      fascia.position.set(edge.x, 0.03, edge.z);
+      fascia.rotation.y = edge.rotation;
+      group.add(fascia);
+    });
+
+    const tileMaterial = this.material(palette.accent, 0.62, 0.1);
+    const tileRows = FEATURE_CONFIG.sectModels.roofTileRows;
+    for (let row = -tileRows; row <= tileRows; row += 2) {
+      const offset = (row / tileRows) * radius * 0.88;
+      const ridgeA = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, radius * 1.82, 8), tileMaterial);
+      ridgeA.rotation.z = Math.PI / 2;
+      ridgeA.position.set(0, height * 0.22 * (1 - Math.abs(offset) / radius), offset);
+      const ridgeB = ridgeA.clone();
+      ridgeB.rotation.set(Math.PI / 2, 0, 0);
+      ridgeB.position.set(offset, height * 0.22 * (1 - Math.abs(offset) / radius), 0);
+      group.add(ridgeA, ridgeB);
+    }
+
+    for (const x of [-radius, radius]) {
+      for (const z of [-radius, radius]) {
+        const ornament = new THREE.Mesh(new THREE.SphereGeometry(0.09, 16, 10), this.emissiveMaterial(palette.glow, 0.18));
+        ornament.position.set(x, height * 0.32, z);
+        group.add(ornament);
+      }
+    }
     return group;
   }
 

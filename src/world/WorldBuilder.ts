@@ -3,6 +3,7 @@ import { AssetManager } from '../assets/AssetManager';
 import { TerrainBuilder, TerrainBuildResult } from '../terrain/TerrainBuilder';
 import { BoundaryBuilder } from './BoundaryBuilder';
 import { LandmarkModelFactory } from './LandmarkModelFactory';
+import { RegionalLandmarkBuilder } from './RegionalLandmarkBuilder';
 import { RegionLabelBuilder } from './RegionLabelBuilder';
 import { SectModelBuilder } from './SectModelBuilder';
 import { TerrainFeatureBuilder } from './TerrainFeatureBuilder';
@@ -16,6 +17,7 @@ export class WorldBuilder {
   private readonly boundaryBuilder = new BoundaryBuilder();
   private readonly labelBuilder = new RegionLabelBuilder();
   private readonly featureBuilder = new TerrainFeatureBuilder();
+  private readonly regionalLandmarkBuilder = new RegionalLandmarkBuilder();
   private readonly sectModelBuilder = new SectModelBuilder();
   private readonly landmarkModelFactory: LandmarkModelFactory | null;
 
@@ -32,6 +34,7 @@ export class WorldBuilder {
     const sectLayer = this.sectModelBuilder.build(terrain.sampler);
     root.add(terrain.mesh);
     root.add(this.featureBuilder.build(terrain.sampler));
+    root.add(this.regionalLandmarkBuilder.build(terrain.sampler));
     root.add(sectLayer);
     root.add(this.boundaryBuilder.build(terrain.sampler));
     root.add(this.labelBuilder.build(terrain.sampler));

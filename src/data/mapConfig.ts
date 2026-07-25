@@ -16,15 +16,15 @@ export const MAP_WINDOW_SIZES = [25, 50, 100] as const;
 export type MapWindowSize = (typeof MAP_WINDOW_SIZES)[number];
 
 const BASE_MAP_SIZE = 720;
-const MAP_WORLD_SCALE = 1.5;
+const MAP_WORLD_SCALE = 3.0;
 const MAP_WORLD_SIZE = BASE_MAP_SIZE * MAP_WORLD_SCALE;
 
 export const TERRAIN_QUALITY_CONFIG = {
   default: 'high',
   levels: {
-    low: { segments: 420 },
-    medium: { segments: 520 },
-    high: { segments: 600 },
+    low: { segments: 600 },
+    medium: { segments: 760 },
+    high: { segments: 960 },
   },
 } as const;
 
@@ -32,10 +32,10 @@ export const RENDER_CONFIG = {
   maxDevicePixelRatio: 2,
   cameraFov: 34,
   cameraNear: 0.1,
-  cameraFar: 6200,
-  initialCameraPosition: { x: 560, y: 820, z: 1320 },
-  controlsMinDistance: 135,
-  controlsMaxDistance: 2400,
+  cameraFar: 12400,
+  initialCameraPosition: { x: 1120, y: 1640, z: 2640 },
+  controlsMinDistance: 270,
+  controlsMaxDistance: 4800,
   controlsMaxPolarAngle: Math.PI * 0.45,
 } as const;
 
@@ -47,7 +47,7 @@ export const RENDER_QUALITY_CONFIG = {
       shadowMapSize: 3072,
       anisotropy: 8,
       terrainTextureSize: 1024,
-      toneMappingExposure: 1.04,
+      toneMappingExposure: 1.16,
     },
     medium: {
       maxDevicePixelRatio: 1.5,
@@ -75,12 +75,12 @@ export const ASSET_CONFIG = {
   useExternalModels: true,
   enableDraco: false,
   enableKtx2: false,
-  modelLoadTimeoutMs: 4500,
+  modelLoadTimeoutMs: 15000,
   forceProceduralModelsInLowQuality: true,
   lodDistances: {
     high: 0,
-    medium: 520,
-    low: 1080,
+    medium: 1040,
+    low: 2160,
   },
 } as const;
 
@@ -161,7 +161,7 @@ export const TERRAIN_CONFIG = {
 
 export const TERRAIN_SCALE_CONFIG = {
   mapSize: TERRAIN_CONFIG.mapSize,
-  terrainVerticalScale: 1,
+  terrainVerticalScale: 1.35,
   ordinaryHillHeight: { min: 6, max: 20 },
   normalMountainHeight: { min: 24, max: 58 },
   maximumMountainHeight: 118,
@@ -176,14 +176,14 @@ export const TERRAIN_SCALE_CONFIG = {
 } as const;
 
 export const MAIN_VOLCANO_CONFIG = {
-  centerX: 0.56,
-  centerZ: 0.84,
-  baseRadius: 0.19,
-  peakHeight: 58,
+  centerX: 0.705,
+  centerZ: 0.825,
+  baseRadius: 0.135,
+  peakHeight: 76,
   craterRadius: 0.046,
-  craterDepth: 22,
-  ridgeStrength: 16,
-  irregularity: 0.28,
+  craterDepth: 27,
+  ridgeStrength: 21,
+  irregularity: 0.34,
   lavaChannelCount: 3,
   lavaChannelWidth: 0.016,
   rimRadius: 0.074,
@@ -191,6 +191,42 @@ export const MAIN_VOLCANO_CONFIG = {
   emberParticleCount: 18,
   lightIntensity: 3.2,
   lightDistance: 215,
+} as const;
+
+/**
+ * 四张分区参考图对应的宏观地貌参数。
+ * 坐标使用归一化地图坐标，所有高度在 TerrainHeight 的统一管线中合成。
+ */
+export const REGIONAL_TERRAIN_CONFIG = {
+  north: {
+    plateauCenter: { x: 0.49, z: 0.19 },
+    plateauRadius: { x: 0.31, z: 0.2 },
+    plateauHeight: 13,
+    abyssCenter: { x: 0.515, z: 0.34 },
+    abyssRadius: { x: 0.2, z: 0.052 },
+    abyssDepth: 35,
+    abyssRimHeight: 19,
+  },
+  west: {
+    basinCenter: { x: 0.185, z: 0.535 },
+    basinRadius: { x: 0.19, z: 0.27 },
+    basinDepth: 8,
+    mesaRingHeight: 13,
+    duneStrength: 7.5,
+  },
+  east: {
+    valleyCenter: { x: 0.79, z: 0.55 },
+    valleyRadius: { x: 0.18, z: 0.235 },
+    valleyDepth: 9,
+    terraceHeight: 5.8,
+    worldTree: { x: 0.755, z: 0.46 },
+  },
+  south: {
+    bloodSeaCenter: { x: 0.5, z: 0.84 },
+    bloodSeaRadius: { x: 0.17, z: 0.105 },
+    bloodSeaDepth: 17,
+    basinRimHeight: 13,
+  },
 } as const;
 
 export const SNOW_EFFECT_CONFIG = {
@@ -343,10 +379,12 @@ export const FEATURE_CONFIG = {
     minRiverDistanceHeightPenalty: 1.8,
   },
   sectModels: {
-    detailScale: 1.45,
+    detailScale: 2.35,
     haloSegments: 128,
-    towerSegments: 36,
-    domeSegments: 48,
+    towerSegments: 48,
+    domeSegments: 64,
+    roofSegments: 28,
+    roofTileRows: 18,
   },
 } as const;
 

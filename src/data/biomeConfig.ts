@@ -21,9 +21,9 @@ export const VEGETATION_CONFIG = {
   canopySegmentCount: 9,
   castShadowMaxInstances: 700,
   lod: {
-    high: { detailMaxDistance: 1800, midMaxDistance: 2300 },
-    medium: { detailMaxDistance: 1250, midMaxDistance: 1950 },
-    low: { detailMaxDistance: 850, midMaxDistance: 1600 },
+    high: { detailMaxDistance: 3600, midMaxDistance: 4600 },
+    medium: { detailMaxDistance: 2500, midMaxDistance: 3900 },
+    low: { detailMaxDistance: 1700, midMaxDistance: 3200 },
   },
   qualityLevels: {
     low: {

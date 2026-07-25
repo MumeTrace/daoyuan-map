@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { SectDefinition } from '../data/regions';
 
-export type LandmarkFallbackType = 'sect' | 'floating-island' | 'nature' | 'test';
+export type LandmarkFallbackType = 'sect' | 'floating-island' | 'nature' | 'decoration' | 'test';
 
 export type LandmarkModelDefinition = {
   id: string;

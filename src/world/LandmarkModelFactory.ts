@@ -35,6 +35,12 @@ export class LandmarkModelFactory {
       const fallback = this.findFallbackGroup(sectLayer, sect.id);
       this.loadAndReplaceSectModel(sect, fallback, sectLayer, sampler);
     });
+    SECTS.forEach((sect) => {
+      const fallback = this.findFallbackGroup(sectLayer, sect.id);
+      sect.externalDecorations?.forEach((decoration, index) => {
+        this.loadSectDecoration(sect, decoration, index, fallback, sectLayer, sampler);
+      });
+    });
   }
 
   dispose(): void {
@@ -114,6 +120,83 @@ export class LandmarkModelFactory {
     }
   }
 
+  private async loadSectDecoration(
+    sect: SectDefinition,
+    decoration: NonNullable<SectDefinition['externalDecorations']>[number],
+    index: number,
+    fallback: THREE.Object3D | null,
+    parent: THREE.Group,
+    sampler: TerrainSampler,
+  ): Promise<void> {
+    const definition = getLandmarkModelDefinition(decoration.modelId);
+    if (!definition) {
+      this.stats.failedModelCount += 1;
+      console.warn('[玄天界 GLB 装饰] 未注册模型。', { sect: sect.name, modelId: decoration.modelId });
+      return;
+    }
+
+    this.stats.requestedModelCount += 1;
+    try {
+      const object = await this.assetManager.createModelInstance(decoration.modelId);
+      if (this.disposed) {
+        return;
+      }
+
+      object.name = `${sect.name}_${decoration.modelId}_装饰_${index + 1}`;
+      object.userData.sectId = sect.id;
+      object.userData.landmarkModelId = decoration.modelId;
+      object.scale.setScalar(decoration.scale * definition.defaultScale);
+      object.rotation.y = decoration.rotationY ?? 0;
+      this.applyShadowPolicy(object, definition);
+
+      const box = new THREE.Box3().setFromObject(object);
+      const bounds = this.boxToBounds(box);
+      object.position.set(
+        decoration.offset.x,
+        decoration.offset.y - bounds.minY + (definition.verticalOffset ?? 0) - (definition.groundEmbed ?? 0),
+        decoration.offset.z,
+      );
+
+      if (fallback) {
+        fallback.add(object);
+      } else {
+        const sampled = sampler.sampleNormalized(sect.position, sect.kind === 'star' ? 78 : 0.08);
+        object.position.add(new THREE.Vector3(sampled.x, sampled.y, sampled.z));
+        parent.add(object);
+      }
+
+      const instance: LandmarkInstance = {
+        sect,
+        modelId: definition.id,
+        object,
+        fallback,
+        bounds,
+        usedExternalModel: true,
+      };
+      this.instances.push(instance);
+      this.stats.loadedModelCount += 1;
+      this.stats.instanceCount = this.instances.length;
+      this.stats.boundsByModel[`${decoration.modelId}:${index}`] = {
+        width: Number(bounds.width.toFixed(2)),
+        height: Number(bounds.height.toFixed(2)),
+        depth: Number(bounds.depth.toFixed(2)),
+      };
+      parent.userData.landmarkStats = this.getStats();
+    } catch (error) {
+      if (this.disposed) {
+        return;
+      }
+      this.stats.failedModelCount += 1;
+      parent.userData.landmarkStats = this.getStats();
+      console.warn('[玄天界 GLB 装饰] 加载失败，保留程序宗门。', {
+        sect: sect.name,
+        modelId: decoration.modelId,
+        url: resolveAssetUrl(definition.url),
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   private placeModel(
     sect: SectDefinition,
     definition: LandmarkModelDefinition,
@@ -131,7 +214,7 @@ export class LandmarkModelFactory {
 
     const modelBox = new THREE.Box3().setFromObject(object);
     const bounds = this.boxToBounds(modelBox);
-    const lift = sect.kind === 'star' ? 78 : 2.1;
+    const lift = sect.kind === 'star' ? 78 : 0.08;
     const sampled = sampler.sampleNormalized(sect.position, lift);
     object.position.set(sampled.x, sampled.y - bounds.minY + (definition.verticalOffset ?? 0) - (definition.groundEmbed ?? 0), sampled.z);
 

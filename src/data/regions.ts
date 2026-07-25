@@ -54,6 +54,12 @@ export type SectDefinition = {
   tone: GeographyLabelDefinition['tone'];
   lift?: number;
   landmarkModelId?: string;
+  externalDecorations?: Array<{
+    modelId: string;
+    offset: { x: number; y: number; z: number };
+    scale: number;
+    rotationY?: number;
+  }>;
 };
 
 export const REGIONS: RegionDefinition[] = [
@@ -176,25 +182,35 @@ export const REGIONS: RegionDefinition[] = [
 export const GEOGRAPHY_LABELS: GeographyLabelDefinition[] = [
   { id: 'sighing-desert', name: '叹息沙海', position: { x: 0.08, z: 0.42 }, scale: 31, tone: 'sand', vertical: true },
   { id: 'west-buddha', name: '西漠佛国', position: { x: 0.18, z: 0.56 }, scale: 33, tone: 'sand', vertical: true },
+  { id: 'sumeru-domain', name: '须弥山域', position: { x: 0.18, z: 0.39 }, scale: 22, tone: 'gold' },
+  { id: 'buddha-caves', name: '十万佛窟', position: { x: 0.09, z: 0.34 }, scale: 17, tone: 'sand' },
   { id: 'north-snow', name: '北冥雪原', position: { x: 0.42, z: 0.18 }, scale: 35, tone: 'snow' },
+  { id: 'polar-frozen-earth', name: '极地冻土', position: { x: 0.34, z: 0.08 }, scale: 20, tone: 'snow' },
+  { id: 'lost-ice-valley', name: '绝迹冰谷', position: { x: 0.5, z: 0.34 }, scale: 21, tone: 'snow' },
+  { id: 'north-abyss', name: '万丈深渊', position: { x: 0.53, z: 0.37 }, scale: 17, tone: 'mountain' },
   { id: 'central-shenzhou', name: '中央神州', position: { x: 0.5, z: 0.58 }, scale: 40, tone: 'gold' },
   { id: 'east-green', name: '东极青木域', position: { x: 0.86, z: 0.58 }, scale: 32, tone: 'green', vertical: true },
+  { id: 'world-tree', name: '建木', position: { x: 0.755, z: 0.46 }, scale: 23, tone: 'gold' },
+  { id: 'cloud-forest', name: '沂云森林·青丘国', position: { x: 0.86, z: 0.43 }, scale: 19, tone: 'green' },
+  { id: 'ten-thousand-demon-mountains', name: '万妖山脉', position: { x: 0.7, z: 0.59 }, scale: 18, tone: 'mountain', vertical: true },
   { id: 'south-fire', name: '南离火洲', position: { x: 0.52, z: 0.88 }, scale: 37, tone: 'fire' },
+  { id: 'unfailing-blood-sea', name: '不枯血海', position: { x: 0.5, z: 0.835 }, scale: 24, tone: 'fire' },
+  { id: 'ten-thousand-foot-volcano', name: '万丈火山', position: { x: 0.705, z: 0.825 }, scale: 22, tone: 'fire' },
+  { id: 'charred-bone-waste', name: '炽骨荒原', position: { x: 0.47, z: 0.96 }, scale: 19, tone: 'fire' },
   { id: 'endless-mountain', name: '无尽山脉', position: { x: 0.94, z: 0.36 }, scale: 30, tone: 'mountain', vertical: true },
-  { id: 'thunder-waste', name: '炽雷荒原', position: { x: 0.46, z: 0.98 }, scale: 22, tone: 'fire' },
   { id: 'star-sea-boundary', name: '星墟护罩', position: { x: 0.5, z: 1.02 }, scale: 18, tone: 'mountain' },
-  { id: 'spirit-mirror', name: '神镜族', position: { x: 0.76, z: 0.44 }, scale: 19, tone: 'green' },
+  { id: 'spirit-mirror', name: '神镜族', position: { x: 0.72, z: 0.56 }, scale: 19, tone: 'green' },
   { id: 'willow-snake', name: '柳蛇族', position: { x: 0.82, z: 0.5 }, scale: 19, tone: 'green' },
-  { id: 'demon-dragon', name: '蛟龙一族', position: { x: 0.61, z: 0.17 }, scale: 18, tone: 'snow' },
+  { id: 'demon-dragon', name: '蛟龙一族', position: { x: 0.56, z: 0.355 }, scale: 18, tone: 'snow' },
   { id: 'cold-palace', name: '广寒宫', position: { x: 0.48, z: 0.16 }, scale: 16, tone: 'snow' },
   { id: 'star-road', name: '星道宗', position: { x: 0.52, z: 0.49 }, scale: 22, tone: 'gold', lift: 92 },
   { id: 'great-zhou', name: '大周仙朝', position: { x: 0.5, z: 0.48 }, scale: 23, tone: 'gold' },
   { id: 'heaven-machine', name: '天机阁', position: { x: 0.66, z: 0.51 }, scale: 18, tone: 'gold' },
   { id: 'green-jade', name: '青玉宗', position: { x: 0.36, z: 0.49 }, scale: 18, tone: 'green' },
   { id: 'ten-thousand-laws', name: '万法宗', position: { x: 0.63, z: 0.61 }, scale: 18, tone: 'gold' },
-  { id: 'corpse-demon', name: '尸魔宗', position: { x: 0.47, z: 0.75 }, scale: 20, tone: 'fire' },
-  { id: 'blood-palace', name: '血神宫', position: { x: 0.42, z: 0.82 }, scale: 18, tone: 'fire' },
-  { id: 'soul-palace', name: '万魂殿', position: { x: 0.61, z: 0.82 }, scale: 18, tone: 'fire' },
+  { id: 'corpse-demon', name: '尸魔宗', position: { x: 0.53, z: 0.745 }, scale: 20, tone: 'fire' },
+  { id: 'blood-palace', name: '血神宫', position: { x: 0.5, z: 0.835 }, scale: 18, tone: 'fire' },
+  { id: 'soul-palace', name: '万魂殿', position: { x: 0.34, z: 0.865 }, scale: 18, tone: 'fire' },
 ];
 
 export const SECTS: SectDefinition[] = [
@@ -207,7 +223,11 @@ export const SECTS: SectDefinition[] = [
     kind: 'imperial',
     importance: 1,
     tone: 'gold',
-    landmarkModelId: 'central_palace',
+    externalDecorations: [
+      { modelId: 'cc0_arch_banner', offset: { x: 0, y: 1.4, z: 7.2 }, scale: 1.05 },
+      { modelId: 'cc0_temple_shrine', offset: { x: -6.4, y: 1.4, z: 4.6 }, scale: 0.92 },
+      { modelId: 'cc0_temple_shrine', offset: { x: 6.4, y: 1.4, z: 4.6 }, scale: 0.92 },
+    ],
   },
   {
     id: 'star-road',
@@ -260,23 +280,32 @@ export const SECTS: SectDefinition[] = [
     kind: 'ice',
     importance: 0.82,
     tone: 'snow',
+    externalDecorations: [
+      { modelId: 'cc0_crystal_cluster', offset: { x: -4.8, y: 1.1, z: 2.4 }, scale: 0.34 },
+      { modelId: 'cc0_crystal_cluster', offset: { x: 5.1, y: 1.1, z: -1.8 }, scale: 0.28, rotationY: 1.4 },
+    ],
   },
   {
     id: 'great-thunder-temple',
     name: '大雷音寺',
     category: '仙帝宗门',
     area: '西漠佛国',
-    position: { x: 0.19, z: 0.36 },
+    position: { x: 0.19, z: 0.47 },
     kind: 'buddha',
     importance: 0.82,
     tone: 'sand',
+    externalDecorations: [
+      { modelId: 'cc0_arch_banner', offset: { x: 0, y: 1.4, z: 7 }, scale: 1.1 },
+      { modelId: 'cc0_temple_shrine', offset: { x: -6.2, y: 1.4, z: 3.8 }, scale: 0.9 },
+      { modelId: 'cc0_temple_shrine', offset: { x: 6.2, y: 1.4, z: 3.8 }, scale: 0.9 },
+    ],
   },
   {
     id: 'sun-palace',
     name: '太阳神宫',
     category: '仙帝宗门',
     area: '南离火洲',
-    position: { x: 0.68, z: 0.75 },
+    position: { x: 0.705, z: 0.805 },
     kind: 'sun',
     importance: 0.84,
     tone: 'fire',
@@ -285,8 +314,8 @@ export const SECTS: SectDefinition[] = [
     id: 'corpse-demon',
     name: '尸魔宗',
     category: '魔道宗门',
-    area: '中州南境',
-    position: { x: 0.47, z: 0.75 },
+    area: '南离火洲北境',
+    position: { x: 0.53, z: 0.745 },
     kind: 'demon',
     importance: 0.76,
     tone: 'fire',
@@ -296,7 +325,7 @@ export const SECTS: SectDefinition[] = [
     name: '血神宫',
     category: '魔道宗门',
     area: '南离火洲',
-    position: { x: 0.42, z: 0.82 },
+    position: { x: 0.5, z: 0.835 },
     kind: 'blood',
     importance: 0.72,
     tone: 'fire',
@@ -306,7 +335,7 @@ export const SECTS: SectDefinition[] = [
     name: '万魂殿',
     category: '魔道宗门',
     area: '南离火洲',
-    position: { x: 0.61, z: 0.82 },
+    position: { x: 0.34, z: 0.865 },
     kind: 'soul',
     importance: 0.72,
     tone: 'fire',
@@ -315,8 +344,8 @@ export const SECTS: SectDefinition[] = [
     id: 'spirit-mirror',
     name: '神镜族',
     category: '妖族势力',
-    area: '东极青木域西部',
-    position: { x: 0.76, z: 0.44 },
+    area: '东极青木域万妖山脉',
+    position: { x: 0.72, z: 0.56 },
     kind: 'beast',
     importance: 0.68,
     tone: 'green',
@@ -326,7 +355,7 @@ export const SECTS: SectDefinition[] = [
     name: '九尾天狐族',
     category: '妖族势力',
     area: '东极青木域东部',
-    position: { x: 0.87, z: 0.56 },
+    position: { x: 0.87, z: 0.42 },
     kind: 'beast',
     importance: 0.68,
     tone: 'green',
@@ -336,9 +365,19 @@ export const SECTS: SectDefinition[] = [
     name: '五色孔雀族',
     category: '妖族势力',
     area: '东极青木域南部',
-    position: { x: 0.74, z: 0.66 },
+    position: { x: 0.76, z: 0.7 },
     kind: 'beast',
     importance: 0.66,
+    tone: 'green',
+  },
+  {
+    id: 'divine-ape',
+    name: '神猿族',
+    category: '妖族势力',
+    area: '东极青木域万妖山脉',
+    position: { x: 0.67, z: 0.62 },
+    kind: 'beast',
+    importance: 0.69,
     tone: 'green',
   },
   {
@@ -355,11 +394,15 @@ export const SECTS: SectDefinition[] = [
     id: 'demon-dragon',
     name: '蛟龙一族',
     category: '妖族势力',
-    area: '北冥雪原龙脉',
-    position: { x: 0.61, z: 0.17 },
+    area: '北冥雪原万丈深渊',
+    position: { x: 0.56, z: 0.355 },
     kind: 'beast',
     importance: 0.7,
     tone: 'snow',
+    externalDecorations: [
+      { modelId: 'cc0_dragon', offset: { x: 0, y: 4.6, z: 0 }, scale: 0.46, rotationY: 0.65 },
+      { modelId: 'cc0_crystal_base', offset: { x: 0, y: 1.4, z: 0 }, scale: 1.35 },
+    ],
   },
   {
     id: 'heaven-machine',
@@ -410,7 +453,6 @@ export const SECTS: SectDefinition[] = [
     kind: 'array',
     importance: 0.56,
     tone: 'gold',
-    landmarkModelId: 'test_landmark',
   },
   {
     id: 'dun-dan',

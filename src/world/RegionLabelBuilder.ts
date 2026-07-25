@@ -39,12 +39,13 @@ export class RegionLabelBuilder {
   build(sampler: TerrainSampler): THREE.Group {
     const group = new THREE.Group();
     group.name = '区域名称标签';
+    const worldScale = Math.max(1, TERRAIN_CONFIG.worldScale / 1.5);
 
     REGIONS.forEach((region) => {
       const sprite = this.createLabelSprite(region);
       const position = sampler.sampleNormalized(region.labelPosition, TERRAIN_CONFIG.labelLift);
       sprite.position.set(position.x, position.y, position.z);
-      sprite.scale.set(region.labelScale, region.labelScale * 0.36, 1);
+      sprite.scale.set(region.labelScale * worldScale, region.labelScale * 0.36 * worldScale, 1);
       group.add(sprite);
     });
 
@@ -55,9 +56,9 @@ export class RegionLabelBuilder {
       const position = sampler.sampleNormalized(label.position, label.lift ?? TERRAIN_CONFIG.labelLift * 0.72);
       sprite.position.set(position.x, position.y, position.z);
       if (label.vertical) {
-        sprite.scale.set(label.scale * 0.42, label.scale * 1.55, 1);
+        sprite.scale.set(label.scale * 0.42 * worldScale, label.scale * 1.55 * worldScale, 1);
       } else {
-        sprite.scale.set(label.scale, label.scale * 0.34, 1);
+        sprite.scale.set(label.scale * worldScale, label.scale * 0.34 * worldScale, 1);
       }
       group.add(sprite);
     });
@@ -67,7 +68,7 @@ export class RegionLabelBuilder {
       const labelLift = sect.lift ? sect.lift + 23 : TERRAIN_CONFIG.labelLift * 0.74;
       const position = sampler.sampleNormalized(sect.position, labelLift);
       sprite.position.set(position.x, position.y, position.z);
-      const scale = 12 + sect.importance * 11;
+      const scale = (12 + sect.importance * 11) * worldScale;
       sprite.scale.set(scale, scale * 0.34, 1);
       group.add(sprite);
     });
@@ -98,7 +99,7 @@ export class RegionLabelBuilder {
     const material = new THREE.SpriteMaterial({
       map: texture,
       transparent: true,
-      depthTest: true,
+      depthTest: false,
       depthWrite: false,
     });
     const sprite = new THREE.Sprite(material);
@@ -141,7 +142,7 @@ export class RegionLabelBuilder {
     const material = new THREE.SpriteMaterial({
       map: texture,
       transparent: true,
-      depthTest: true,
+      depthTest: false,
       depthWrite: false,
       opacity: 0.94,
     });
@@ -179,7 +180,7 @@ export class RegionLabelBuilder {
     const material = new THREE.SpriteMaterial({
       map: texture,
       transparent: true,
-      depthTest: true,
+      depthTest: false,
       depthWrite: false,
       opacity: 0.96,
     });

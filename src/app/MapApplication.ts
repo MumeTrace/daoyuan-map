@@ -53,7 +53,7 @@ export class MapApplication {
       this.resize();
       this.startAnimationLoop();
       status.dataset.kind = 'info';
-      status.textContent = 'Phase 2：低多边形森林、灌木、岩石和区域生态已升级。';
+      status.textContent = '地形尺度已扩容：世界宽深 2160，山体垂直比例 1.35。';
       getHostWindow().setTimeout(() => {
         if (status.dataset.kind !== 'error') {
           status.dataset.kind = 'hidden';
@@ -106,39 +106,27 @@ export class MapApplication {
   private createScene(): THREE.Scene {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x101926);
-    scene.fog = new THREE.Fog(0x101926, TERRAIN_CONFIG.mapSize * 1.15, TERRAIN_CONFIG.mapSize * 3.2);
+    scene.fog = new THREE.Fog(0x101926, TERRAIN_CONFIG.mapSize * 1.7, TERRAIN_CONFIG.mapSize * 3.8);
 
     const quality = RENDER_QUALITY_CONFIG.levels[RENDER_QUALITY_CONFIG.default];
-    const hemisphereLight = new THREE.HemisphereLight(0xcfe4ff, 0x2b211b, 1.18);
-    const ambientLight = new THREE.AmbientLight(0x8490a0, 0.22);
-    const sunLight = new THREE.DirectionalLight(0xffdda3, 2.45);
-    sunLight.position.set(260, 360, 170);
+    const hemisphereLight = new THREE.HemisphereLight(0xd8ebff, 0x3a2b22, 1.52);
+    const ambientLight = new THREE.AmbientLight(0xa8b1bd, 0.36);
+    const sunLight = new THREE.DirectionalLight(0xffdda3, 2.75);
+    const worldScaleFactor = TERRAIN_CONFIG.worldScale / 1.5;
+    const shadowExtent = TERRAIN_CONFIG.mapSize * 0.76;
+    sunLight.position.set(260 * worldScaleFactor, 360 * worldScaleFactor, 170 * worldScaleFactor);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.set(quality.shadowMapSize, quality.shadowMapSize);
     sunLight.shadow.camera.near = 20;
-    sunLight.shadow.camera.far = 1850;
-    sunLight.shadow.camera.left = -820;
-    sunLight.shadow.camera.right = 820;
-    sunLight.shadow.camera.top = 820;
-    sunLight.shadow.camera.bottom = -820;
+    sunLight.shadow.camera.far = TERRAIN_CONFIG.mapSize * 1.72;
+    sunLight.shadow.camera.left = -shadowExtent;
+    sunLight.shadow.camera.right = shadowExtent;
+    sunLight.shadow.camera.top = shadowExtent;
+    sunLight.shadow.camera.bottom = -shadowExtent;
     sunLight.shadow.bias = -0.00008;
     sunLight.shadow.normalBias = 0.018;
 
-    const water = new THREE.Mesh(
-      new THREE.CircleGeometry(TERRAIN_CONFIG.mapSize * 0.68, 160),
-      new THREE.MeshStandardMaterial({
-        color: 0x163146,
-        roughness: 0.82,
-        metalness: 0.05,
-        transparent: true,
-        opacity: 0.55,
-      }),
-    );
-    water.name = '边缘云海水色底盘';
-    water.rotation.x = -Math.PI / 2;
-    water.position.y = -8.5;
-
-    scene.add(hemisphereLight, ambientLight, sunLight, water);
+    scene.add(hemisphereLight, ambientLight, sunLight);
     return scene;
   }
 

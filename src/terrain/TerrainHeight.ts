@@ -1,5 +1,11 @@
 import { createNoise2D } from 'simplex-noise';
-import { MAIN_VOLCANO_CONFIG, MOUNTAIN_CONFIG, TERRAIN_CONFIG, TERRAIN_SCALE_CONFIG } from '../data/mapConfig';
+import {
+  MAIN_VOLCANO_CONFIG,
+  MOUNTAIN_CONFIG,
+  REGIONAL_TERRAIN_CONFIG,
+  TERRAIN_CONFIG,
+  TERRAIN_SCALE_CONFIG,
+} from '../data/mapConfig';
 import { NormalizedPoint } from '../data/regions';
 import { getHorizontalNoiseScale, worldToNormalized } from '../utils/MapCoordinateSystem';
 
@@ -9,8 +15,10 @@ export type TerrainContributions = {
   mountainHeight: number;
   ridgeHeight: number;
   hillHeight: number;
+  regionalLandformHeight: number;
   volcanoHeight: number;
   valleyDepth: number;
+  regionalLandformDepth: number;
   riverDepth: number;
   erosionDepth: number;
 };
@@ -32,6 +40,12 @@ export type TerrainSample = {
   valley: number;
   volcano: number;
   erosion: number;
+  regionFeatures: {
+    snowAbyss: number;
+    desertBasin: number;
+    forestValley: number;
+    bloodSea: number;
+  };
   contributions: TerrainContributions;
 };
 
@@ -101,12 +115,12 @@ function clamp01(value: number): number {
 
 function smoothstep(edge0: number, edge1: number, value: number): number {
   const x = clamp01((value - edge0) / (edge1 - edge0));
-  return x * x * (3 - 2 * x);
+  return clamp01(x * x * (3 - 2 * x));
 }
 
 function smootherstep(edge0: number, edge1: number, value: number): number {
   const x = clamp01((value - edge0) / (edge1 - edge0));
-  return x * x * x * (x * (x * 6 - 15) + 10);
+  return clamp01(x * x * x * (x * (x * 6 - 15) + 10));
 }
 
 function ellipseInfluence(nx: number, nz: number, cx: number, cz: number, rx: number, rz: number): number {
@@ -114,6 +128,16 @@ function ellipseInfluence(nx: number, nz: number, cx: number, cz: number, rx: nu
   const dz = (nz - cz) / rz;
   const distance = Math.sqrt(dx * dx + dz * dz);
   return 1 - smootherstep(0.48, 1.16, distance);
+}
+
+function ellipseDistance(nx: number, nz: number, cx: number, cz: number, rx: number, rz: number): number {
+  const dx = (nx - cx) / rx;
+  const dz = (nz - cz) / rz;
+  return Math.sqrt(dx * dx + dz * dz);
+}
+
+function ellipseRingInfluence(distance: number, radius: number, width: number): number {
+  return 1 - smootherstep(0, width, Math.abs(distance - radius));
 }
 
 function lineDistance(px: number, pz: number, ax: number, az: number, bx: number, bz: number): number {
@@ -196,6 +220,7 @@ export class TerrainHeight {
     const { mountainHeight, ridgeHeight, mountainInfluence } = this.mountainPathHeight(nx, nz, noiseX, noiseZ, ridgeNoise, sideRidge);
     const snowPeakHeight = this.snowPeakHeight(nx, nz, noiseX, noiseZ, regionWeights.snow, ridgeNoise);
     const hillHeight = this.hillHeight(regionWeights, noiseX, noiseZ, mediumNoise, detailNoise, mountainInfluence);
+    const regionalLandforms = this.regionalLandforms(nx, nz, noiseX, noiseZ, regionWeights, mediumNoise);
     const { volcanoHeight, lava } = this.volcanoHeight(nx, nz, noiseX, noiseZ);
     const riverDepth = this.riverDepth(nx, nz);
     const valleyDepth = this.valleyInfluence(nx, nz, riverDepth);
@@ -208,8 +233,10 @@ export class TerrainHeight {
       mountainHeight,
       ridgeHeight,
       hillHeight,
+      regionalLandformHeight: regionalLandforms.height,
       volcanoHeight,
       valleyDepth,
+      regionalLandformDepth: regionalLandforms.depth,
       riverDepth,
       erosionDepth,
     };
@@ -222,8 +249,10 @@ export class TerrainHeight {
         ridgeHeight +
         snowPeakHeight +
         hillHeight +
+        regionalLandforms.height +
         volcanoHeight -
         valleyDepth -
+        regionalLandforms.depth -
         riverDepth -
         erosionDepth -
         edgeDrop) *
@@ -239,6 +268,7 @@ export class TerrainHeight {
       valley: valleyDepth,
       volcano: Math.max(0, volcanoHeight),
       erosion: erosionDepth,
+      regionFeatures: regionalLandforms.features,
       contributions,
     };
   }
@@ -279,6 +309,113 @@ export class TerrainHeight {
       (Math.sin(worldX * 0.082 + worldZ * 0.033) * 4.2 + Math.sin(worldX * 0.036 - worldZ * 0.074) * 2.2 + 5.8);
     const footSediment = mountainInfluence * (1 - Math.min(1, mountainInfluence * 1.7)) * TERRAIN_SCALE_CONFIG.sedimentStrength;
     return centralHills + forestHills + snowPlateau + desertDunes + footSediment;
+  }
+
+  /**
+   * 将四张分区图中的大地貌作为连续高度场加入统一管线。
+   * 这里仅塑造台原、盆地、断谷和环形高地；可见水面与建木由地貌细节层负责。
+   */
+  private regionalLandforms(
+    nx: number,
+    nz: number,
+    worldX: number,
+    worldZ: number,
+    weights: RegionWeights,
+    mediumNoise: number,
+  ): {
+    height: number;
+    depth: number;
+    features: TerrainSample['regionFeatures'];
+  } {
+    const north = REGIONAL_TERRAIN_CONFIG.north;
+    const west = REGIONAL_TERRAIN_CONFIG.west;
+    const east = REGIONAL_TERRAIN_CONFIG.east;
+    const south = REGIONAL_TERRAIN_CONFIG.south;
+
+    const northPlateau =
+      ellipseInfluence(
+        nx,
+        nz,
+        north.plateauCenter.x,
+        north.plateauCenter.z,
+        north.plateauRadius.x,
+        north.plateauRadius.z,
+      ) *
+      weights.snow;
+    const northAbyssDistance = ellipseDistance(
+      nx,
+      nz,
+      north.abyssCenter.x,
+      north.abyssCenter.z,
+      north.abyssRadius.x,
+      north.abyssRadius.z,
+    );
+    const snowAbyss = (1 - smootherstep(0.36, 1.05, northAbyssDistance)) * weights.snow;
+    const snowAbyssRim = ellipseRingInfluence(northAbyssDistance, 1.04, 0.22) * weights.snow;
+
+    const westBasinDistance = ellipseDistance(
+      nx,
+      nz,
+      west.basinCenter.x,
+      west.basinCenter.z,
+      west.basinRadius.x,
+      west.basinRadius.z,
+    );
+    const desertBasin = (1 - smootherstep(0.35, 1.12, westBasinDistance)) * weights.desert;
+    const westMesaRing = ellipseRingInfluence(westBasinDistance, 1.02, 0.28) * weights.desert;
+    const duneBands =
+      (Math.sin(worldX * 0.046 + worldZ * 0.017) * 0.5 + 0.5) *
+      (Math.sin(worldX * 0.018 - worldZ * 0.039) * 0.35 + 0.65) *
+      desertBasin;
+
+    const eastValleyDistance = ellipseDistance(
+      nx,
+      nz,
+      east.valleyCenter.x,
+      east.valleyCenter.z,
+      east.valleyRadius.x,
+      east.valleyRadius.z,
+    );
+    const forestValley = (1 - smootherstep(0.28, 1.12, eastValleyDistance)) * weights.forest;
+    const terraceBands =
+      Math.pow(0.5 + 0.5 * Math.cos(eastValleyDistance * Math.PI * 7.2), 2.2) *
+      forestValley *
+      (0.6 + mediumNoise * 0.18);
+
+    const bloodSeaDistance = ellipseDistance(
+      nx,
+      nz,
+      south.bloodSeaCenter.x,
+      south.bloodSeaCenter.z,
+      south.bloodSeaRadius.x,
+      south.bloodSeaRadius.z,
+    );
+    const bloodSea = (1 - smootherstep(0.22, 1.05, bloodSeaDistance)) * weights.fire;
+    const bloodSeaRim = ellipseRingInfluence(bloodSeaDistance, 1.08, 0.3) * weights.fire;
+
+    const height =
+      northPlateau * north.plateauHeight +
+      snowAbyssRim * north.abyssRimHeight +
+      westMesaRing * west.mesaRingHeight +
+      duneBands * west.duneStrength +
+      terraceBands * east.terraceHeight +
+      bloodSeaRim * south.basinRimHeight;
+    const depth =
+      snowAbyss * north.abyssDepth +
+      desertBasin * west.basinDepth +
+      forestValley * east.valleyDepth +
+      bloodSea * south.bloodSeaDepth;
+
+    return {
+      height,
+      depth,
+      features: {
+        snowAbyss: clamp01(snowAbyss),
+        desertBasin: clamp01(desertBasin),
+        forestValley: clamp01(forestValley),
+        bloodSea: clamp01(bloodSea),
+      },
+    };
   }
 
   private snowPeakHeight(nx: number, nz: number, worldX: number, worldZ: number, snowWeight: number, ridgeNoise: number): number {
